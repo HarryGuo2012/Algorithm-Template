@@ -17,12 +17,14 @@ struct ZKW {
 
 	vector<edge> G[MAX_N];
 	bool vis[MAX_N];
-	int dist[MAX_N];
 
 	int source, target;
 
 	// the final cost and flow
 	int cost, flow;
+
+	// maintain the distance between source and target
+	int pi;
 
 	// initialize the Dinic
 	// n is the total vertices excludes source and target
@@ -35,10 +37,10 @@ struct ZKW {
 		for (int i = 0; i <= target; ++ i) {
 			G[i].clear();
 			vis[i] = 0;
-			dist[i] = 0;
 		}
 
 		cost = flow = 0;
+		pi = 0;
 	}
 
 	// set source and target by yourself
@@ -55,17 +57,18 @@ struct ZKW {
 
 	// find new augment path
 	int augment(int v, int nowFlow) {
-		if (v == target) return cost += -dist[source] * nowFlow, flow += nowFlow, nowFlow;
+		if (v == target) return cost += pi * nowFlow, flow += nowFlow, nowFlow;
 		vis[v] = 1;
 
 		int newFlow = nowFlow;
 		for (int i = 0; i < (int)G[v].size(); ++ i) {
 			edge &e = G[v][i];
-			if (e.cap && dist[e.to] + e.cost == dist[v] && !vis[e.to]) {
+			if (e.cap && !e.cost && !vis[e.to]) {
 				int d = augment(e.to, min(newFlow, e.cap));
 				e.cap -= d;
 				G[e.to][e.rev].cap += d;
 				newFlow -= d;
+				if (!newFlow) return nowFlow;
 			}
 		}
 		return nowFlow - newFlow;
@@ -86,9 +89,10 @@ struct ZKW {
 			if (vis[v]) for (int i = 0; i < (int)G[v].size(); ++ i) {
 				edge &e = G[v][i];
 				e.cost -= d;
-				G[e.to][e.cost].cost += d;
+				G[e.to][e.rev].cost += d;
 			}
 		}
+		pi += d;
 		return true;
 	}
 
