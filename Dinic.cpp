@@ -33,6 +33,13 @@ struct Dinic {
 			G[i].clear();
 	}
 
+	// set source and target by yourself
+	// call after init
+	void setSourceTarget(int s, int t) {
+		source = s;
+		target = t;
+	}
+
 	void addEdge(int from, int to, int cap) {
 		G[from].push_back(edge(to, cap, G[to].size()));
 		G[to].push_back(edge(from, 0, G[from].size() - 1));
